@@ -50,9 +50,10 @@ export default function CargarFacturas() {
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected, pregunta]);
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if(pregunta) {
       if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
         setSelected((prev) => (prev === "si" ? "no" : "si"));
@@ -121,17 +122,22 @@ const guardar = async () => {
       showSuccess(response.data.message);
     }
     setPregunta(true)
-  } catch (error: any) {
-    showError(error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      showError(error.message);
+    } else {
+      showError("Error desconocido al guardar la factura");
+    }
   }
 };
 
 useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if(pregunta) {
         if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
         setSelected((prev) => (prev === "si" ? "no" : "si"));
-        if (e.key === "Enter") {
+        }
+        if (e.key === "Enter") { 
           if (selected === "si") {
             volverACargar();
           } else {
@@ -139,11 +145,11 @@ useEffect(() => {
           }
         }
       }
-      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
 const limpiar = () => {
@@ -194,6 +200,7 @@ const limpiar = () => {
         setFormData({...formData, ruc: formData.ruc + '-' + res.data.guion})
         setNombreRazon(res.data.razon_social);
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setNombreRazon("Error");
       showError('Hubo un error')
@@ -227,11 +234,13 @@ const limpiar = () => {
         const response = await api.get(`/api/getClient/${id}`)
         setClient(response.data)
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       catch (error) {
         showError('Hubo un error al traer el cliente')
       }
     }
     fetchClient()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   useEffect(()=> {
