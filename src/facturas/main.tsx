@@ -12,6 +12,7 @@ import FacturaFilters from "../components/InvoicesFilter";
 import Header from "../components/Header";
 import type { Filters } from "../interfaces/Filters";
 import { useNotifications } from "../context/NotificationContext";
+import type { FacturaContent } from "../interfaces/FacturaContent";
 
 
 dayjs.extend(utc);
@@ -45,25 +46,27 @@ const Facturas: React.FC = () => {
         setFacturas(facturasResp.data);
 
         setError(null);
-      } catch (e: any) {
-        setError(
-          e.response?.data?.message ||
-            "Error al cargar los datos del cliente y facturas"
-        );
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          showError(e.message);
+        } else {
+          showError("Error desconocido al cargar los datos");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const handleFilter = (filters: {
+    idClient: string | undefined;
     timbrado: string;
+    rol: string;
     fechaDesde: string;
     fechaHasta: string;
-    rol: string;
-    idClient: string;
   }) => {
     setFilters(filters)
   };
@@ -73,8 +76,12 @@ const Facturas: React.FC = () => {
       const res = await api.post('/downloadFacturas', filters)
       console.log(res.data)
       showSuccess('Se envio la solicitud de descarga')
-    } catch (error) {
-      showError('Hubo un error al descargar')
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        showError('Hubo un error al descargar');
+      } else {
+        showError("Error desconocido al descargar");
+      }
     }
   }
 
@@ -145,7 +152,7 @@ const Facturas: React.FC = () => {
   {(() => {
     const term = searchTerm.toLowerCase();
 
-    const matchFactura = (factura: any, rol: "vendedor" | "cliente") => {
+    const matchFactura = (factura: FacturaContent, rol: "vendedor" | "cliente") => {
       const razon_social = rol === "vendedor" ? factura.userClient?.razon_social : factura.userVendedor?.razon_social;
       const base = rol === "vendedor" ? factura.userClient?.base : factura.userVendedor?.base;
       const fecha = dayjs.utc(factura.fecha_emision).tz("America/Asuncion").format("DD/MM/YYYY");

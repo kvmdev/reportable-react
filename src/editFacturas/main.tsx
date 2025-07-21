@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
 import { useEffect, useState } from "react"
@@ -145,7 +146,6 @@ export default function EditFacturas() {
       setNombreRazon("SIN NOMBRE")
       setFormData({...formData, ruc: 'x'})
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.tipoIdentificacion])
 
   useEffect(() => {
@@ -290,8 +290,12 @@ export default function EditFacturas() {
       } else {
         showError("Error al guardar la factura")
       }
-    } catch (error) {
-      showError("Error al guardar la factura")
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        showError('Error al guardar la factura')
+      } else {
+        showError("Error desconocido al guardar la factura")
+      }
     }
   }
 

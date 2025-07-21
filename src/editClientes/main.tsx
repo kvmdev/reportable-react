@@ -70,8 +70,12 @@ export default function ClienteEditor() {
       } else {
         showError("Error al actualizar el cliente")
       }
-    } catch (error) {
-      showError("Ocurrió un error al actualizar el cliente")
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        showError("Ocurrió un error al actualizar el cliente")
+      } else {
+        showError("Error desconocido al actualizar el cliente")
+      }
     }
   }
 

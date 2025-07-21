@@ -57,14 +57,17 @@ function Login() {
       } else {
         throw new Error('Credenciales incorrectas');
       }
-    } catch (error: any) {
-      Swal.fire({
-        title: 'Error',
-        text: error.message || 'Ocurrió un error al procesar su solicitud.',
-        icon: 'error',
-      });
-      console.error('Login error:', error);
-    }
+    } catch (error: unknown) {
+        if(error instanceof Error) {
+          Swal.fire({
+            title: 'Error',
+            text: error.message || 'Ocurrió un error al procesar su solicitud.',
+            icon: 'error',
+          });
+        } else {
+          console.error('Login error:', error);
+        }
+      }
   };
 
   return (

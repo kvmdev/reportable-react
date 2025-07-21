@@ -50,12 +50,12 @@ export default function RegistrarCliente() {
         showNotification('¡Cliente creado correctamente!', 'success');
         setTimeout(() => navigate('/clientes'), 1000);
       }
-    } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        'Ocurrió un error inesperado.';
-      showNotification(message, 'danger');
+    } catch (error: unknown) {
+        if(error instanceof Error) {
+          showNotification('Hubo un error', 'danger');
+        } else {
+          showNotification('Hubo un error', 'danger');
+        }
     } finally {
       setIsSubmitting(false);
     }

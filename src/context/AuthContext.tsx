@@ -82,7 +82,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           loggedIn: true,
           error: null,
         });
-      } catch (error: any) { // Usar 'any' para el catch de error si no sabes el tipo exacto, o un tipo más específico
+      } catch (error: unknown) {
+        
         localStorage.removeItem("jwt");
         document.cookie =
           "Authorization=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
