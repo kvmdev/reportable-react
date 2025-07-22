@@ -12,6 +12,7 @@ import api from "../lib/api"
 import { useNotifications } from "../context/NotificationContext"
 import type { Cliente } from "../interfaces/Cliente"
 import type { FormData } from "../interfaces/FacturaFormData"
+import dayjs from "dayjs"
 
 export default function CargarFacturas() {
   const { id } = useParams()
@@ -71,7 +72,7 @@ export default function CargarFacturas() {
   const [formData, setFormData] = useState<FormData>({
     tipoComprobante: 'factura',
     rolUsuario: 'compra',
-    fechaEmision: '',
+    fechaEmision: dayjs().startOf('day'),
     timbrado: '',
     numeroFactura: '',
     foreignCurrency: false,
@@ -109,6 +110,7 @@ const guardar = async () => {
     const cleanFormData: FormData = {
       ...formData,
       idClient: id,
+      fechaEmision: typeof formData.fechaEmision !== 'string' ? dayjs(formData.fechaEmision).startOf('day').utc().toString() : formData.fechaEmision,
       montoGravado10: formData.montoGravado10.replace(/\./g, ''),
       montoGravado5: formData.montoGravado5.replace(/\./g, ''),
       montoExento: formData.montoExento.replace(/\./g, ''),
@@ -156,7 +158,7 @@ const limpiar = () => {
   setFormData({
     tipoComprobante: 'factura',
     rolUsuario: 'compra',
-    fechaEmision: '',
+    fechaEmision: dayjs().startOf('day'),
     timbrado: '',
     numeroFactura: '',
     foreignCurrency: false,
@@ -343,7 +345,13 @@ const limpiar = () => {
               Fecha de Emisión
             </Label>
             <div className="relative">
-              <Input type="date" placeholder="Elegir Fecha" value={formData.fechaEmision} onChange={(e)=> setFormData({...formData, fechaEmision: e.target.value})} className="bg-yellow-50 border-yellow-200 pr-10" />
+              <Input
+                type="date"
+                placeholder="Elegir Fecha"
+                value={typeof formData.fechaEmision === 'string' ? dayjs(formData.fechaEmision).format('YYYY-MM-DD') : formData.fechaEmision.format('YYYY-MM-DD')}
+                onChange={(e) => setFormData({ ...formData, fechaEmision: dayjs(e.target.value).startOf('day') })}
+                className="bg-yellow-50 border-yellow-200 pr-10"
+              />
             </div>
           </div>
 

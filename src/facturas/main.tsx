@@ -155,7 +155,7 @@ const Facturas: React.FC = () => {
     const matchFactura = (factura: FacturaContent, rol: "vendedor" | "cliente") => {
       const razon_social = rol === "vendedor" ? factura.userClient?.razon_social : factura.userVendedor?.razon_social;
       const base = rol === "vendedor" ? factura.userClient?.base : factura.userVendedor?.base;
-      const fecha = dayjs.utc(factura.fecha_emision).tz("America/Asuncion").format("DD/MM/YYYY");
+      const fecha = dayjs.utc(factura.fecha_emision).format('DD/MM/YYYY')
       const rolStr = rol === "vendedor" ? "Vendedor" : "Comprador";
 
       return (
@@ -181,7 +181,7 @@ const Facturas: React.FC = () => {
           <tr key={`v-${index}`}>
             <td>{factura.userClient?.razon_social || "-"}</td>
             <td>{factura.userClient?.base + '-' + factura.userClient?.guion || "-"}</td>
-            <td>{dayjs.utc(factura.fecha_emision).tz("America/Asuncion").format("DD/MM/YYYY")}</td>
+            <td>{dayjs.utc(factura.fecha_emision).format("DD/MM/YYYY")}</td>
             <td>{factura.valor}</td>
             <td>{factura.timbrado}</td>
             <td>{factura.numeroFactura}</td>
@@ -194,8 +194,8 @@ const Facturas: React.FC = () => {
         {filteredClientes.map((factura, index) => (
           <tr key={`c-${index}`}>
             <td>{factura.userVendedor?.razon_social || "-"}</td>
-            <td>{factura.userVendedor?.base + '-' + factura.userClient?.guion || "-"}</td>
-            <td>{dayjs.utc(factura.fecha_emision).tz("America/Asuncion").format("DD/MM/YYYY")}</td>
+            <td>{factura.userVendedor?.base + '-' + factura.userVendedor?.guion || "-"}</td>
+            <td>{dayjs.utc(factura.fecha_emision).format("DD/MM/YYYY")}</td>
             <td>{factura.valor}</td>
             <td>{factura.timbrado}</td>
             <td>{factura.numeroFactura}</td>

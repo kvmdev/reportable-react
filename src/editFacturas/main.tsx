@@ -51,7 +51,7 @@ export default function EditFacturas() {
     numeroFactura: "",
     timbrado: "",
     condicion: "",
-    fecha_emision: new Date(),
+    fecha_emision: dayjs(),
     valor: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -345,7 +345,7 @@ export default function EditFacturas() {
               Fecha de Emisión
             </Label>
             <div className="relative">
-              <Input readOnly type="date" placeholder="Elegir Fecha" value={formData.fechaEmision} onChange={(e)=> setFormData({...formData, fechaEmision: e.target.value})} className="bg-yellow-50 border-yellow-200 pr-10" />
+              <Input readOnly type="date" placeholder="Elegir Fecha" value={typeof formData.fechaEmision !== 'string' ? dayjs.utc(formData.fechaEmision).format('DD-MM-YYYY') : formData.fechaEmision} onChange={(e)=> setFormData({...formData, fechaEmision: e.target.value})} className="bg-yellow-50 border-yellow-200 pr-10" />
             </div>
           </div>
 
