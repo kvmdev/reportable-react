@@ -16,6 +16,7 @@ import { useNotifications } from "../context/NotificationContext"
 import type { Cliente } from "../interfaces/Cliente"
 import type { FormData } from "../interfaces/FacturaFormData"
 import { AxiosError } from "axios"
+import type { BackendErrorResponse } from "../interfaces/BackErrorResponse"
 
 // --- Función de Utilidad para Formatear y Validar la Fecha (fuera del componente) ---
 /**
@@ -55,11 +56,6 @@ function formatAndValidateDate(dateString: string): string | null {
     }
 
     return `${day}/${month}/${year}`;
-}
-
-// --- Interfaz para errores de backend ---
-interface BackendErrorResponse {
-  message: string;
 }
 
 export default function CargarFacturas() {

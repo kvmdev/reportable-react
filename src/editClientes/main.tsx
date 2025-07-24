@@ -11,6 +11,8 @@ import { useNavigate, useParams } from "react-router-dom"
 import api from "../lib/api"
 import { CardFooter } from "react-bootstrap"
 import { useNotifications } from "../context/NotificationContext"
+import type { BackendErrorResponse } from "../interfaces/BackErrorResponse"
+import type { AxiosError } from "axios"
 
 interface Cliente {
   razon_social: string
@@ -74,13 +76,9 @@ export default function ClienteEditor() {
       } else {
         showError("Error al actualizar el cliente")
       }
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        showError("Ocurrió un error al actualizar el cliente")
-        console.log(error)
-      } else {
-        showError("Error desconocido al actualizar el cliente")
-      }
+    } catch (error) {
+      const axiosError = error as AxiosError<BackendErrorResponse>;
+      showError(axiosError.response?.data?.message || 'Error al editar el cliente');
     }
   }
 
