@@ -86,7 +86,7 @@ export default function ClienteEditor() {
 
   const onCancel = () => {
     // Aquí puedes manejar la lógica para cancelar la edición, como redirigir a otra página
-    navigate('/clientes')
+    navigate(-1) // Regresa a la página anterior
   }
 
 

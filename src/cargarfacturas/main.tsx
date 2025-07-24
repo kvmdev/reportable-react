@@ -479,7 +479,13 @@ export default function CargarFacturas() {
             <Label htmlFor="timbrado" className="text-sm font-medium text-gray-700">
               Timbrado
             </Label>
-            <Input readOnly className="bg-yellow-50 border-yellow-200" value={formData.timbrado} onChange={(e)=> setFormData(prev => ({...prev, timbrado: e.target.value}))}/>
+            <Input readOnly className="bg-yellow-50 border-yellow-200 mb-3" value={formData.timbrado} onChange={(e)=> setFormData(prev => ({...prev, timbrado: e.target.value}))}/>
+            { !client.currentTimbrado && formData.rolUsuario === 'venta' && (
+              <>
+                <span className="text-red-600 mr-2">Falta cargar timbrado</span>
+                <Button style={{fontSize: '15px'}} className="bg-gray-400 p-2" onClick={()=> navigate(`/edit/cliente/${client.id}`)}>Cargar Timbrado</Button>
+              </>
+            )}
           </div>
 
           <div className="space-y-2">
