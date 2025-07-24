@@ -76,6 +76,7 @@ export default function CargarFacturas() {
   const [selected, setSelected] = useState("si");
   const siButtonRef = useRef<HTMLButtonElement>(null);
   const noButtonRef = useRef<HTMLButtonElement>(null);
+  const [numeroFacturaError, setNumeroFacturaError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Estado del formulario
@@ -161,6 +162,54 @@ export default function CargarFacturas() {
       ? value.replace(/[^\d]/g, "") // elimina todo lo que no sea número
       : value.toString();
     return clean.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
+  const validarEstructuraNumeroFactura = (numeroFactura: string): boolean => {
+    const regex = /^\d{3}-\d{3}-\d{7}$/;
+    return regex.test(numeroFactura);
+  };
+
+  // --- Handler para el autoformateo (en onChange) ---
+  const handleNumeroFacturaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    // Limpiar el valor: Remover todo lo que no sea un dígito
+    const cleanedValue = value.replace(/\D/g, '');
+
+    let formattedValue = '';
+    // Aplicar el formato XXX-XXX-XXXXXXX
+    if (cleanedValue.length > 0) {
+      formattedValue += cleanedValue.substring(0, 3);
+    }
+    if (cleanedValue.length > 3) {
+      formattedValue += '-' + cleanedValue.substring(3, 6);
+    }
+    if (cleanedValue.length > 6) {
+      formattedValue += '-' + cleanedValue.substring(6, 13);
+    }
+
+    // Actualizar el estado del formulario con el valor formateado
+    setFormData(prev => ({ ...prev, numeroFactura: formattedValue }));
+    // NOTA: No limpiamos el error aquí para que persista hasta el blur si ya se mostró.
+    // Podrías limpiar si el usuario empieza a borrar todo, si lo prefieres.
+    // setNumeroFacturaError(null); // Descomentar si quieres que el error desaparezca al empezar a escribir
+  };
+
+  // --- Nuevo handler para la validación al perder el foco (en onBlur) ---
+  const handleNumeroFacturaBlur = () => {
+    const numeroFacturaActual = formData.numeroFactura;
+
+    // Solo validar si hay algo escrito
+    if (numeroFacturaActual.length > 0) {
+      if (!validarEstructuraNumeroFactura(numeroFacturaActual)) {
+        setNumeroFacturaError("Formato incorrecto. Debe ser XXX-XXX-XXXXXXX.");
+      } else {
+        setNumeroFacturaError(null); // Limpiar el error si es válido
+      }
+    } else {
+      // Si el campo está vacío al perder el foco, no mostrar error, pero asegurar que el error previo se limpie
+      setNumeroFacturaError(null);
+    }
   };
 
   // Función para guardar la factura
@@ -488,7 +537,17 @@ export default function CargarFacturas() {
             <Label htmlFor="numero-comprobante" className="text-sm font-medium text-gray-700">
               Número del Comprobante
             </Label>
-            <Input value={formData.numeroFactura} onChange={(e)=> setFormData(prev => ({...prev, numeroFactura: e.target.value}))} className="bg-yellow-50 border-yellow-200" />
+            <Input
+              value={formData.numeroFactura}
+              onChange={handleNumeroFacturaChange} // Sigue formateando en tiempo real
+              onBlur={handleNumeroFacturaBlur}     // <-- Nuevo handler para la validación del error
+              className="bg-yellow-50 border-yellow-200"
+              maxLength={15} // Limita la longitud máxima del input para el formato (3+1+3+1+7 = 15)
+            />
+            {/* Muestra el error solo si numeroFacturaError tiene valor */}
+            {numeroFacturaError && (
+              <p className="text-red-500 text-xs mt-1">{numeroFacturaError}</p>
+            )}
           </div>
         </div>
 
