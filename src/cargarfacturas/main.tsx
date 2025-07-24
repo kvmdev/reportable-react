@@ -13,6 +13,11 @@ import { useNotifications } from "../context/NotificationContext"
 import type { Cliente } from "../interfaces/Cliente"
 import type { FormData } from "../interfaces/FacturaFormData"
 import dayjs from "dayjs"
+import { AxiosError } from "axios"
+
+interface BackendErrorResponse {
+  message: string;
+}
 
 export default function CargarFacturas() {
   const { id } = useParams()
@@ -48,10 +53,11 @@ export default function CargarFacturas() {
     }
   }, [selected, pregunta])
 
+  
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected, pregunta]);
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -68,7 +74,7 @@ export default function CargarFacturas() {
       }
     }
   }
-
+  
   const [formData, setFormData] = useState<FormData>({
     tipoComprobante: 'factura',
     rolUsuario: 'compra',
@@ -90,8 +96,22 @@ export default function CargarFacturas() {
     origen: 'MANUAL',
     cdc: ""
   })
-
-
+  
+  useEffect(() => {
+    if(formData.rolUsuario === 'compra') {
+      setFormData({
+        ...formData,
+        timbrado: ''
+      })
+    } else {
+      setFormData({
+        ...formData,
+        timbrado: client.currentTimbrado || ''
+      })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.rolUsuario])
+  
   const volverACargar = ()=> {
     limpiar()
     setPregunta(false)
@@ -124,12 +144,9 @@ const guardar = async () => {
       showSuccess(response.data.message);
     }
     setPregunta(true)
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      showError(error.message);
-    } else {
-      showError("Error desconocido al guardar la factura");
-    }
+  } catch (error) {
+    const axiosError = error as AxiosError<BackendErrorResponse>;
+    showError(axiosError.response !== undefined ? axiosError.response.data?.message : 'Error al guardar la factura');
   }
 };
 
@@ -156,10 +173,10 @@ useEffect(() => {
 
 const limpiar = () => {
   setFormData({
+    ...formData,
     tipoComprobante: 'factura',
-    rolUsuario: 'compra',
+    rolUsuario: formData.rolUsuario,
     fechaEmision: dayjs().startOf('day'),
-    timbrado: '',
     numeroFactura: '',
     foreignCurrency: false,
     condicion: 'contado',
@@ -235,6 +252,7 @@ const limpiar = () => {
       try {
         const response = await api.get(`/api/getClient/${id}`)
         setClient(response.data)
+        setFormData({...formData, timbrado: ''})
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       catch (error) {
@@ -289,7 +307,7 @@ const limpiar = () => {
       }
       <div className="max-w-6xl mx-auto bg-white shadow-lg">
         {/* Header Section - DATOS DEL COMPROBANTE */}
-        <div className="bg-gray-600 text-white p-3 text-center font-semibold">DATOS DEL COMPROBANTE ({client.razon_social} Ruc: {client.base + '-' + client.guion})</div>
+        <div className="bg-gray-600 text-white p-3 text-center font-semibold">DATOS DEL COMPROBANTE ({client.razon_social} RUC: {client.base + '-' + client.guion})</div>
 
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2 d-flex gap-5">
@@ -370,7 +388,7 @@ const limpiar = () => {
             <Label htmlFor="timbrado" className="text-sm font-medium text-gray-700">
               Timbrado
             </Label>
-            <Input className="bg-yellow-50 border-yellow-200" value={formData.timbrado} onChange={(e)=> setFormData({...formData, timbrado: e.target.value})}/>
+            <Input readOnly className="bg-yellow-50 border-yellow-200" value={formData.timbrado} onChange={(e)=> setFormData({...formData, timbrado: e.target.value})}/>
           </div>
 
           <div className="space-y-2">

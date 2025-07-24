@@ -38,6 +38,10 @@ export default function Clientes() {
     fetchClientes();
   }, []);
 
+  useEffect(()=> {
+    console.log(clientes)
+  }, [clientes])
+
   const handleCreateFactura = (clienteId: Cliente['id']) => {
     navigate(`/facturas/${clienteId}`);
   };
