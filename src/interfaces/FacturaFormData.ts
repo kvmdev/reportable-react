@@ -1,9 +1,8 @@
-import dayjs from 'dayjs'
-
 export interface FormData {
   tipoComprobante: string;
   rolUsuario: string;
-  fechaEmision: dayjs.Dayjs | string;
+  // Change fechaEmision to strictly 'string' as the input will now hold 'DD/MM/AAAA'
+  fechaEmision: string; 
   timbrado: string;
   numeroFactura: string;
   foreignCurrency: boolean;
