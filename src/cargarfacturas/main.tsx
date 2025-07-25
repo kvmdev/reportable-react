@@ -61,6 +61,7 @@ function formatAndValidateDate(dateString: string): string | null {
 export default function CargarFacturas() {
   const { id } = useParams();
   const { showError, showSuccess } = useNotifications();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Estados relacionados con el formulario y la lógica de negocio
   const [impuesto10, setImpuesto10] = useState("");
@@ -279,6 +280,9 @@ export default function CargarFacturas() {
     setContadoCheck(true);
     setDateInputError(null); // Limpiar error de fecha
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
   };
 
   // --- Handlers para la lógica de fechas DDMMAAAA ---
@@ -500,6 +504,7 @@ export default function CargarFacturas() {
                 value={formData.fechaEmision}
                 onChange={handleDateInputChange}
                 onBlur={handleDateInputBlur}
+                ref={inputRef}
                 onKeyDown={handleDateInputKeyDown}
                 className="bg-yellow-50 border-yellow-200 pr-10"
               />
