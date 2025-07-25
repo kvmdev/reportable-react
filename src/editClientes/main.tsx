@@ -20,8 +20,6 @@ interface Cliente {
   pagaIRE: boolean
   pagaIRP: boolean
   currentTimbrado: string;
-  facturaDesde: string;
-  facturaHasta: string;
 }
 
 export default function ClienteEditor() {
@@ -31,9 +29,7 @@ export default function ClienteEditor() {
     pagaIVA: false,
     pagaIRE: false,
     pagaIRP: false,
-    currentTimbrado: "",
-    facturaDesde: "",
-    facturaHasta: ""
+    currentTimbrado: ""
   })    
   const navigate = useNavigate()
   const { showSuccess, showError } = useNotifications()                                                                                          
@@ -102,8 +98,8 @@ export default function ClienteEditor() {
             id="razon-social"
             type="text"
             value={formData.razon_social}
+            onChange={(e) => handleInputChange('razon_social', e.target.value)}
             placeholder="Ingrese la razón social"
-            readOnly={true}
           />
           {/* {errors.razon_social && <p className="text-sm text-red-500">{errors.razon_social}</p>} */}
         </div>
@@ -155,24 +151,6 @@ export default function ClienteEditor() {
                 type="text"
                 defaultValue={formData.currentTimbrado}
                 onChange={(e) => setFormData({...formData, currentTimbrado: e.target.value})}
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="factura-desde" className="text-sm font-normal cursor-pointer">Numero de factura desde</Label>
-              <Input
-                id="factura-desde"
-                type="text"
-                defaultValue={formData.facturaDesde}
-                onChange={(e) => setFormData({...formData, facturaDesde: e.target.value})}
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="factura-hasta" className="text-sm font-normal cursor-pointer">Numero de factura hasta</Label>
-              <Input
-                id="factura-hasta"
-                type="text"
-                defaultValue={formData.facturaHasta}
-                onChange={(e) => setFormData({...formData, facturaHasta: e.target.value})}
               />
             </div>
           </div>
