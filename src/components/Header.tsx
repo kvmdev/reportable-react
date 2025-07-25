@@ -67,7 +67,7 @@ export default function Header() {
             <Dropdown.Item as={Link} to="/profile"> {/* Use as={Link} for react-router-dom links */}
               Perfil
             </Dropdown.Item>
-            <Dropdown.Item onClick={()=> {localStorage.setItem('jwt', ''); window.cookieStore.set('Authorization', ''); window.location.reload()}} className="text-danger"> {/* Assuming logout is from AuthContext */}
+            <Dropdown.Item onClick={()=> {localStorage.setItem('jwt', ''); document.cookie = `Authorization=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`; window.location.reload()}} className="text-danger"> {/* Assuming logout is from AuthContext */}
               Cerrar Sesión
             </Dropdown.Item>
           </Dropdown.Menu>
