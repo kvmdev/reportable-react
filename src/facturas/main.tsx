@@ -138,6 +138,7 @@ const Facturas: React.FC = () => {
         <Table striped className="mt-3" id="myTable">
         <thead className="sticky">
           <tr>
+            <th>Origen</th>
             <th>Nombre</th>
             <th>RUC</th>
             <th>Fecha</th>
@@ -179,6 +180,7 @@ const Facturas: React.FC = () => {
       <>
         {filteredVendedor.map((factura, index) => (
           <tr key={`v-${index}`}>
+            <td>{factura.origenInformacion || "-"}</td>
             <td>{factura.userClient?.razon_social || "-"}</td>
             <td>{factura.userClient?.base + '-' + factura.userClient?.guion || "-"}</td>
             <td>{dayjs.utc(factura.fecha_emision).format("DD/MM/YYYY")}</td>
@@ -193,6 +195,7 @@ const Facturas: React.FC = () => {
 
         {filteredClientes.map((factura, index) => (
           <tr key={`c-${index}`}>
+            <td>{factura.origenInformacion || "-"}</td>
             <td>{factura.userVendedor?.razon_social || "-"}</td>
             <td>{factura.userVendedor?.base + '-' + factura.userVendedor?.guion || "-"}</td>
             <td>{dayjs.utc(factura.fecha_emision).format("DD/MM/YYYY")}</td>
