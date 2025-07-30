@@ -12,6 +12,7 @@ import ClienteEditor from "./editClientes/main"
 import { NotificationProvider } from "./context/NotificationContext"
 import EditFacturas from "./editFacturas/main"
 import RegistrarContador from "./registrarContador/main"
+import Profile from "./profile/main"
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<Dashboard />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/registrar-cliente" element={<RegistrarCliente />} />
             <Route path="/registrar-contador" element={<RegistrarContador />} />
             <Route path="/clientes" element={<Clientes/>} />

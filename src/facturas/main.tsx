@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Table, Alert, Button } from "react-bootstrap";
+import { Table, Button } from "react-bootstrap";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -14,7 +14,6 @@ import type { Filters } from "../interfaces/Filters";
 import { useNotifications } from "../context/NotificationContext";
 import type { FacturaContent } from "../interfaces/FacturaContent";
 
-
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -25,11 +24,14 @@ const Facturas: React.FC = () => {
   const [client, setClient] = useState<Cliente>({})
   const [facturas, setFacturas] = useState<Factura>({facturasClientes: [], facturasVendedor: []})
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterState, setFilterState] = useState(false)
-  const [filters, setFilters] = useState<Filters>({ timbrado: '', fechaDesde: '', fechaHasta: '', rol: 'COMPRAS', idClient: id })
+  const [filters, setFilters] = useState<Filters>({ fechaInicio: '', fechaFin: '', rol: 'COMPRAS', idClient: id })
   const { showError, showSuccess } = useNotifications()
+
+  useEffect(()=> {
+    console.log(filters)
+  }, [filters])
 
   useEffect(() => {
     if (!id) return;
@@ -45,7 +47,6 @@ const Facturas: React.FC = () => {
         const facturasResp = await api.get(`/api/getFacturas/${id}`);
         setFacturas(facturasResp.data);
 
-        setError(null);
       } catch (e: unknown) {
         if (e instanceof Error) {
           showError(e.message);
@@ -63,22 +64,22 @@ const Facturas: React.FC = () => {
 
   const handleFilter = (filters: {
     idClient: string | undefined;
-    timbrado: string;
     rol: string;
-    fechaDesde: string;
-    fechaHasta: string;
+    fechaInicio: string;
+    fechaFin: string;
   }) => {
     setFilters(filters)
   };
 
   const handleDownload = async ()=> {
     try {
-      const res = await api.post('/downloadFacturas', filters)
+      
+      const res = await api.post('/api/report/excel', filters)
       console.log(res.data)
       showSuccess('Se envio la solicitud de descarga')
     } catch (error: unknown) {
       if (error instanceof Error) {
-        showError('Hubo un error al descargar');
+        showError(error.message);
       } else {
         showError("Error desconocido al descargar");
       }
@@ -86,25 +87,9 @@ const Facturas: React.FC = () => {
   }
 
   if (loading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center vh-100">
-        <div className="spinner-border" role="status">
-          <span className="visually-hidden">Cargando...</span>
-        </div>
-      </div>
-    );
+    return (<div>Loading...</div>)
   }
 
-  if (error) {
-    return (
-      <div className="container mt-5">
-        <Alert variant="danger">{error}</Alert>
-        <Button variant="secondary" onClick={() => navigate(-1)}>
-          Volver
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div className="py-3">

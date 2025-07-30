@@ -42,8 +42,8 @@ const FacturaFilters: React.FC<Props> = ({ onFilter, filters, onClose }) => {
           <label className="block text-sm font-medium text-gray-700">Fecha Desde</label>
           <Input
             type="date"
-            value={filters.fechaDesde}
-            onChange={(e) => onFilter({ ...filters, fechaDesde: e.target.value })}
+            value={filters.fechaInicio}
+            onChange={(e) => onFilter({ ...filters, fechaInicio: e.target.value })}
             className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
         </div>
@@ -52,8 +52,8 @@ const FacturaFilters: React.FC<Props> = ({ onFilter, filters, onClose }) => {
           <label className="block text-sm font-medium text-gray-700">Fecha Hasta</label>
           <Input
             type="date"
-            value={filters.fechaHasta}
-            onChange={(e) => onFilter({ ...filters, fechaHasta: e.target.value })}
+            value={filters.fechaFin}
+            onChange={(e) => onFilter({ ...filters, fechaFin: e.target.value })}
             className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
         </div>
