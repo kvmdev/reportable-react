@@ -87,7 +87,13 @@ const Facturas: React.FC = () => {
   }
 
   if (loading) {
-    return (<div>Loading...</div>)
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+    );
   }
 
 
