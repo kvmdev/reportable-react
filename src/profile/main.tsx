@@ -48,6 +48,7 @@ const Profile = () => {
       }
     };
     fetchMyInfo();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array means this runs once on mount
 
   if (loading) {
