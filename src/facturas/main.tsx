@@ -163,7 +163,20 @@ const Facturas: React.FC = () => {
     };
 
     const allFacturas = [...facturas.facturasVendedor, ...facturas.facturasClientes];
-    const combinedFilteredFacturas = allFacturas.filter(f => matchFactura(f));
+    
+    // Filtra y luego ordena las facturas, primero las no leídas (Pendiente), luego las leídas (Revisado)
+    const combinedFilteredFacturas = allFacturas
+        .filter(f => matchFactura(f))
+        .sort((a, b) => {
+            if (a.is_read && !b.is_read) {
+                return 1; // b (no leído) va primero
+            }
+            if (!a.is_read && b.is_read) {
+                return -1; // a (no leído) va primero
+            }
+            return 0; // mantener el orden original si ambos son iguales
+        });
+        
     const hasResults = combinedFilteredFacturas.length > 0;
 
     return (
@@ -260,6 +273,7 @@ const Facturas: React.FC = () => {
                                 <th style={{ width: '7%' }}>Timbrado</th>
                                 <th style={{ width: '7%' }}>Origen del Comprobante</th>
                                 <th style={{ width: '180px', maxWidth: '180px' }}>CDC</th>
+                                <th style={{ width: '7%' }}>Estado</th>
                                 <th style={{ width: '90px' }}>Acciones</th>
                             </tr>
                         </thead>
@@ -268,7 +282,7 @@ const Facturas: React.FC = () => {
                                 if (isLoadingFacturas) {
                                     return (
                                         <tr>
-                                            <td colSpan={13} className="text-center">
+                                            <td colSpan={14} className="text-center">
                                                 <Spinner animation="border" role="status" variant="primary">
                                                     <span className="visually-hidden">Cargando...</span>
                                                 </Spinner>
@@ -280,7 +294,7 @@ const Facturas: React.FC = () => {
                                 if (!hasResults) {
                                     return (
                                         <tr>
-                                            <td colSpan={13} className="text-center">
+                                            <td colSpan={14} className="text-center">
                                                 {month && year ? 'No se encontraron facturas para el período seleccionado.' : 'Por favor, seleccione el período y haga clic en "Mostrar Facturas".'}
                                             </td>
                                         </tr>
@@ -306,6 +320,8 @@ const Facturas: React.FC = () => {
                                             const origenComprobante = factura.origenInformacion || "-";
                                             const cdc = factura.cdc || "-";
 
+                                            const statusClass = factura.is_read ? 'bg-success text-white' : 'bg-warning text-dark';
+
                                             return (
                                                 <tr key={`f-${index}`}>
                                                     <td className="text-truncate" title={rucInformante}>{rucInformante}</td>
@@ -321,6 +337,9 @@ const Facturas: React.FC = () => {
                                                     <td className="text-truncate" title={origenComprobante}>{origenComprobante}</td>
                                                     <td style={{ maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={cdc}>
                                                         {cdc}
+                                                    </td>
+                                                    <td className={statusClass} style={{ width: '7%' }}>
+                                                        {factura.is_read ? 'Revisado' : 'Pendiente'}
                                                     </td>
                                                     <td style={{ width: '90px' }} className="text-truncate">
                                                         <Button onClick={() => { navigate('/factura/' + factura.id + '/' + id); }}>Editar</Button>

@@ -15,6 +15,7 @@ import type { FormData } from "../interfaces/FacturaFormData"
 import type { FacturaContent } from "../interfaces/FacturaContent"
 import type { Cliente } from "../interfaces/Cliente"
 import dayjs from "dayjs"
+import { useFacturaContext } from "../context/FacturaContext"
 
 export default function EditFacturas() {
   const { id, idClient } = useParams<{ id: string; idClient: string }>()
@@ -22,6 +23,7 @@ export default function EditFacturas() {
   const { showError, showSuccess } = useNotifications()
   const [impuesto10, setImpuesto10] = useState("")
   const [impuesto5, setImpuesto5] = useState("")
+  const { facturas, setFacturas } = useFacturaContext()
   const [client, setClient] = useState<Cliente>({
     razon_social: '',
     base: '',
@@ -287,6 +289,15 @@ export default function EditFacturas() {
       const res = await api.post('/v0/api/editFactura', {...formData, idFactura: id })
       if(res.status === 200) {
         showSuccess("Factura guardada correctamente")
+        const facturasCopy = facturas
+        for(let i = 0; i < facturasCopy[formData.rolUsuario == 'compra' ? 'facturasClientes' : 'facturasVendedor'].length; i++) {
+          if(facturasCopy[formData.rolUsuario == 'compra' ? 'facturasClientes' : 'facturasVendedor'][i].id == factura.id) {
+            facturasCopy[formData.rolUsuario == 'compra' ? 'facturasClientes' : 'facturasVendedor'][i].is_read = true
+            break
+          }
+        }
+        setFacturas(facturasCopy)
+        navigate(-1)
       } else {
         showError("Error al guardar la factura")
       }
