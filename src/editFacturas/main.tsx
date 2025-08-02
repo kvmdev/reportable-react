@@ -113,7 +113,7 @@ export default function EditFacturas() {
   })
 
   const cancelar = ()=> {
-    navigate('/facturas/' + idClient)
+    navigate(-1)
   }
 
   const fetchClient = async (id: string) => {
@@ -303,7 +303,7 @@ export default function EditFacturas() {
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-6xl mx-auto bg-white shadow-lg">
         {/* Header Section - DATOS DEL COMPROBANTE */}
-        <div className="bg-gray-600 text-white p-3 text-center font-semibold">DATOS DEL COMPROBANTE ({client.razon_social} Ruc: {client.base + '-' + client.guion})</div>
+        <div className="bg-gray-600 text-white p-3 text-center font-semibold">DATOS DEL COMPROBANTE ({client.razon_social} RUC: {client.base + '-' + client.guion})</div>
 
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2 d-flex gap-5">

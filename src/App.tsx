@@ -13,6 +13,7 @@ import { NotificationProvider } from "./context/NotificationContext"
 import EditFacturas from "./editFacturas/main"
 import RegistrarContador from "./registrarContador/main"
 import Profile from "./profile/main"
+import { FacturaProvider } from "./context/FacturaContext"
 
 function App() {
   return (
@@ -27,8 +28,8 @@ function App() {
             <Route path="/registrar-cliente" element={<RegistrarCliente />} />
             <Route path="/registrar-contador" element={<RegistrarContador />} />
             <Route path="/clientes" element={<Clientes/>} />
-            <Route path="/facturas/:id" element={<Facturas />} />
-            <Route path="/factura/:id/:idClient" element={<EditFacturas />} />
+            <Route path="/facturas/:id" element={<FacturaProvider><Facturas /></FacturaProvider>} />
+            <Route path="/factura/:id/:idClient" element={<FacturaProvider><EditFacturas /></FacturaProvider>} />
             <Route path='/edit/cliente/:id' element={<ClienteEditor />} />
             <Route path="/cargarfactura/:id" element={<CargarFacturas />} />
             <Route path="*" element={<h1>404 Not Found</h1>} />

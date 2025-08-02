@@ -426,7 +426,7 @@ export default function CargarFacturas() {
               </Button>
               <Button
                 ref={noButtonRef}
-                onClick={() => navigate("/clientes")}
+                onClick={() => navigate(-1)}
                 className={`px-4 py-2 rounded ${
                   selected === "no"
                     ? "bg-red-700 text-white"
@@ -472,20 +472,6 @@ export default function CargarFacturas() {
                 <SelectContent>
                   <SelectItem value="compra">COMPRADOR</SelectItem>
                   <SelectItem value="venta">VENDEDOR</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="tipo-comprobante" className="text-sm font-medium text-gray-700">
-                Origen
-              </Label>
-              <Select value={formData.origen} onValueChange={(value)=> {setFormData(prev => ({...prev, origen: value}))}}>
-                <SelectTrigger className="bg-yellow-50 border-yellow-200">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="MANUAL">MANUAL</SelectItem>
-                  <SelectItem value="ELECTRONICO">ELECTRONICO</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -799,7 +785,7 @@ export default function CargarFacturas() {
         {/* Action Buttons */}
         <div className="p-6 flex justify-between">
           <div className="flex space-x-4">
-            <Button variant="secondary" className="bg-gray-500 hover:bg-gray-600 text-white" onClick={() => navigate("/clientes")}> {/* Añadido navigate para cancelar */}
+            <Button variant="secondary" className="bg-gray-500 hover:bg-gray-600 text-white" onClick={() => navigate(-1)}> {/* Añadido navigate para cancelar */}
               <Trash2 className="w-4 h-4 mr-2" />
               Cancelar
             </Button>

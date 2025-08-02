@@ -9,9 +9,11 @@ type Props = {
   onFilter: (filters: Filters) => void;
   filters: Filters
   onClose: () => void;
+  download: () => void;
+  setDownloading: () => void;
 };
 
-const FacturaFilters: React.FC<Props> = ({ onFilter, filters, onClose }) => {
+const FacturaFilters: React.FC<Props> = ({ onFilter, filters, onClose, download }) => {
 
   return (
     <div
@@ -62,8 +64,9 @@ const FacturaFilters: React.FC<Props> = ({ onFilter, filters, onClose }) => {
           <Button
             type="submit"
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none"
+            onClick={download}
           >
-            Aplicar filtros
+            Descargar
           </Button>
         </div>
       </Form>
