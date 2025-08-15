@@ -1,3 +1,4 @@
+import type dayjs from "dayjs";
 import type { Cliente } from "./Cliente";
 
 export interface FacturaContent {
@@ -5,7 +6,7 @@ export interface FacturaContent {
   numeroFactura: string;
   timbrado: string;
   condicion: string;
-  fecha_emision: Date;
+  fecha_emision: dayjs.Dayjs | string;
   valor: number;
   createdAt: Date;
   updatedAt: Date;

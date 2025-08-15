@@ -3,7 +3,7 @@ import { X, CheckCircle, AlertCircle } from "lucide-react"
 
 interface Notification {
   id: string
-  message: string
+  message: string | undefined
   type: "success" | "error"
   duration?: number
 }

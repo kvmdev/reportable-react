@@ -11,12 +11,15 @@ import { useNavigate, useParams } from "react-router-dom"
 import api from "../lib/api"
 import { CardFooter } from "react-bootstrap"
 import { useNotifications } from "../context/NotificationContext"
+import type { BackendErrorResponse } from "../interfaces/BackErrorResponse"
+import type { AxiosError } from "axios"
 
 interface Cliente {
   razon_social: string
   pagaIVA: boolean
   pagaIRE: boolean
   pagaIRP: boolean
+  currentTimbrado: string;
 }
 
 export default function ClienteEditor() {
@@ -25,7 +28,8 @@ export default function ClienteEditor() {
     razon_social: "",
     pagaIVA: false,
     pagaIRE: false,
-    pagaIRP: false
+    pagaIRP: false,
+    currentTimbrado: ""
   })    
   const navigate = useNavigate()
   const { showSuccess, showError } = useNotifications()                                                                                          
@@ -58,11 +62,9 @@ export default function ClienteEditor() {
     try {
       const data = {
         id: id,
-        razonSocial: formData.razon_social,
-        pagaIVA: formData.pagaIVA,
-        pagaIRE: formData.pagaIRE,
-        pagaIRP: formData.pagaIRP
+        ...formData
       }
+      console.log("Datos a enviar:", data)
       const response = await api.post('/v0/api/cliente/edit', data)
       if(response.status === 200) {
         showSuccess("Cliente actualizado correctamente")
@@ -70,18 +72,15 @@ export default function ClienteEditor() {
       } else {
         showError("Error al actualizar el cliente")
       }
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        showError("Ocurrió un error al actualizar el cliente")
-      } else {
-        showError("Error desconocido al actualizar el cliente")
-      }
+    } catch (error) {
+      const axiosError = error as AxiosError<BackendErrorResponse>;
+      showError(axiosError.response?.data?.message || 'Error al editar el cliente');
     }
   }
 
   const onCancel = () => {
     // Aquí puedes manejar la lógica para cancelar la edición, como redirigir a otra página
-    navigate('/clientes')
+    navigate(-1) // Regresa a la página anterior
   }
 
 
@@ -99,7 +98,7 @@ export default function ClienteEditor() {
             id="razon-social"
             type="text"
             value={formData.razon_social}
-            onChange={(e) => handleInputChange("razon_social", e.target.value)}
+            onChange={(e) => handleInputChange('razon_social', e.target.value)}
             placeholder="Ingrese la razón social"
           />
           {/* {errors.razon_social && <p className="text-sm text-red-500">{errors.razon_social}</p>} */}
@@ -144,6 +143,15 @@ export default function ClienteEditor() {
               <Label htmlFor="paga-irp" className="text-sm font-normal cursor-pointer">
                 Paga IRP (Impuesto a la Renta Personal)
               </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="current-timbrado" className="text-sm font-normal cursor-pointer">Timbrado</Label>
+              <Input
+                id="current-timbrado"
+                type="text"
+                defaultValue={formData.currentTimbrado}
+                onChange={(e) => setFormData({...formData, currentTimbrado: e.target.value})}
+              />
             </div>
           </div>
         </div>

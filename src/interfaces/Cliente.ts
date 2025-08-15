@@ -7,4 +7,5 @@ export interface Cliente {
   pagaIRE?: boolean;
   pagaIRP?: boolean;
   guion?: string;
+  currentTimbrado?: string | undefined;
 }

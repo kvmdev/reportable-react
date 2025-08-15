@@ -15,6 +15,7 @@ import type { FormData } from "../interfaces/FacturaFormData"
 import type { FacturaContent } from "../interfaces/FacturaContent"
 import type { Cliente } from "../interfaces/Cliente"
 import dayjs from "dayjs"
+import { useFacturaContext } from "../context/FacturaContext"
 
 export default function EditFacturas() {
   const { id, idClient } = useParams<{ id: string; idClient: string }>()
@@ -22,6 +23,7 @@ export default function EditFacturas() {
   const { showError, showSuccess } = useNotifications()
   const [impuesto10, setImpuesto10] = useState("")
   const [impuesto5, setImpuesto5] = useState("")
+  const { facturas, setFacturas } = useFacturaContext()
   const [client, setClient] = useState<Cliente>({
     razon_social: '',
     base: '',
@@ -51,7 +53,7 @@ export default function EditFacturas() {
     numeroFactura: "",
     timbrado: "",
     condicion: "",
-    fecha_emision: new Date(),
+    fecha_emision: dayjs(),
     valor: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -113,7 +115,7 @@ export default function EditFacturas() {
   })
 
   const cancelar = ()=> {
-    navigate('/facturas/' + idClient)
+    navigate(-1)
   }
 
   const fetchClient = async (id: string) => {
@@ -287,6 +289,15 @@ export default function EditFacturas() {
       const res = await api.post('/v0/api/editFactura', {...formData, idFactura: id })
       if(res.status === 200) {
         showSuccess("Factura guardada correctamente")
+        const facturasCopy = facturas
+        for(let i = 0; i < facturasCopy[formData.rolUsuario == 'compra' ? 'facturasClientes' : 'facturasVendedor'].length; i++) {
+          if(facturasCopy[formData.rolUsuario == 'compra' ? 'facturasClientes' : 'facturasVendedor'][i].id == factura.id) {
+            facturasCopy[formData.rolUsuario == 'compra' ? 'facturasClientes' : 'facturasVendedor'][i].is_read = true
+            break
+          }
+        }
+        setFacturas(facturasCopy)
+        navigate(-1)
       } else {
         showError("Error al guardar la factura")
       }
@@ -303,7 +314,7 @@ export default function EditFacturas() {
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-6xl mx-auto bg-white shadow-lg">
         {/* Header Section - DATOS DEL COMPROBANTE */}
-        <div className="bg-gray-600 text-white p-3 text-center font-semibold">DATOS DEL COMPROBANTE ({client.razon_social} Ruc: {client.base + '-' + client.guion})</div>
+        <div className="bg-gray-600 text-white p-3 text-center font-semibold">DATOS DEL COMPROBANTE ({client.razon_social} RUC: {client.base + '-' + client.guion})</div>
 
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2 d-flex gap-5">
@@ -345,7 +356,7 @@ export default function EditFacturas() {
               Fecha de Emisión
             </Label>
             <div className="relative">
-              <Input readOnly type="date" placeholder="Elegir Fecha" value={formData.fechaEmision} onChange={(e)=> setFormData({...formData, fechaEmision: e.target.value})} className="bg-yellow-50 border-yellow-200 pr-10" />
+              <Input readOnly type="date" placeholder="Elegir Fecha" value={typeof formData.fechaEmision !== 'string' ? dayjs.utc(formData.fechaEmision).format('DD-MM-YYYY') : formData.fechaEmision} onChange={(e)=> setFormData({...formData, fechaEmision: e.target.value})} className="bg-yellow-50 border-yellow-200 pr-10" />
             </div>
           </div>
 
