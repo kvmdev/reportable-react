@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import { FaEdit, FaFile } from 'react-icons/fa';
 import api from '../lib/api';
-import React from 'react'; // Import React for React.Fragment
+import React from 'react';
 
 interface Cliente {
   id: string | number;
