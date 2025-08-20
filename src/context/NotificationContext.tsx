@@ -4,16 +4,17 @@ import { X, CheckCircle, AlertCircle } from "lucide-react"
 interface Notification {
   id: string
   message: string | undefined
-  type: "success" | "error"
+  type: "success" | "error" | "warning" // ¡Nuevo tipo añadido!
   duration?: number
 }
 
 interface NotificationContextType {
   notifications: Notification[]
-  addNotification: (message: string, type: "success" | "error", duration?: number) => void
+  addNotification: (message: string, type: "success" | "error" | "warning", duration?: number) => void // Añadir el nuevo tipo
   removeNotification: (id: string) => void
   showSuccess: (message: string, duration?: number) => void
   showError: (message: string, duration?: number) => void
+  showWarning: (message: string, duration?: number) => void // ¡Nueva función añadida!
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined)
@@ -34,7 +35,7 @@ interface NotificationProviderProps {
 export function NotificationProvider({ children }: NotificationProviderProps) {
   const [notifications, setNotifications] = useState<Notification[]>([])
 
-  const addNotification = (message: string, type: "success" | "error", duration = 5000) => {
+  const addNotification = (message: string, type: "success" | "error" | "warning", duration = 5000) => {
     const id = Math.random().toString(36).substr(2, 9)
     const notification: Notification = { id, message, type, duration }
 
@@ -60,6 +61,10 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     addNotification(message, "error", duration)
   }
 
+  const showWarning = (message: string, duration?: number) => {
+    addNotification(message, "warning", duration) // ¡Nueva función que añade el tipo "warning"!
+  }
+
   return (
     <NotificationContext.Provider
       value={{
@@ -68,6 +73,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
         removeNotification,
         showSuccess,
         showError,
+        showWarning, // ¡Añadir la nueva función al contexto!
       }}
     >
       {children}
@@ -106,6 +112,8 @@ function NotificationItem({ notification, onClose }: NotificationItemProps) {
         return "bg-green-50 border-green-200 text-green-800"
       case "error":
         return "bg-red-50 border-red-200 text-red-800"
+      case "warning": // ¡Nuevo caso para el estilo amarillo!
+        return "bg-yellow-50 border-yellow-200 text-yellow-800"
       default:
         return "bg-gray-50 border-gray-200 text-gray-800"
     }
@@ -117,6 +125,8 @@ function NotificationItem({ notification, onClose }: NotificationItemProps) {
         return <CheckCircle className="w-5 h-5 text-green-600" />
       case "error":
         return <AlertCircle className="w-5 h-5 text-red-600" />
+      case "warning": // ¡Nuevo caso para el icono de advertencia!
+        return <AlertCircle className="w-5 h-5 text-yellow-600" />
       default:
         return null
     }

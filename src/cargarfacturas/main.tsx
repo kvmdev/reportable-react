@@ -15,7 +15,7 @@ import api from "../lib/api"
 import { useNotifications } from "../context/NotificationContext"
 import type { Cliente } from "../interfaces/Cliente"
 import type { FormData } from "../interfaces/FacturaFormData"
-import { AxiosError } from "axios"
+import axios, { AxiosError } from "axios"
 import type { BackendErrorResponse } from "../interfaces/BackErrorResponse"
 
 // --- Función de Utilidad para Formatear y Validar la Fecha (fuera del componente) ---
@@ -60,7 +60,7 @@ function formatAndValidateDate(dateString: string): string | null {
 
 export default function CargarFacturas() {
   const { id } = useParams();
-  const { showError, showSuccess } = useNotifications();
+  const { showError, showSuccess, showWarning } = useNotifications();
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Estados relacionados con el formulario y la lógica de negocio
@@ -71,6 +71,7 @@ export default function CargarFacturas() {
   const [contadoCheck, setContadoCheck] = useState(true);
   const [nombreRazon, setNombreRazon] = useState("");
   const [dateInputError, setDateInputError] = useState<string | null>(null); // Nuevo estado para errores de fecha
+  const [habilitarNombreRazon, setHabilitarNombreRazon] = useState(false)
 
   // Estados para la pregunta "Cargar otra factura?"
   const [pregunta, setPregunta] = useState(false);
@@ -78,6 +79,7 @@ export default function CargarFacturas() {
   const siButtonRef = useRef<HTMLButtonElement>(null);
   const noButtonRef = useRef<HTMLButtonElement>(null);
   const [numeroFacturaError, setNumeroFacturaError] = useState<string | null>(null);
+  const [availableCreateCButton, setAvailableCreateCButton] = useState(true)
   const navigate = useNavigate();
 
   // Estado del formulario
@@ -102,6 +104,39 @@ export default function CargarFacturas() {
     origen: 'MANUAL',
     cdc: ""
   });
+
+  const createNewClient = async () => {
+  try {
+    // Verificar si el nombre o razón social fue ingresado
+    if (!nombreRazon || nombreRazon?.trim() === '') {
+      showError('El nombre o razón social es obligatorio.');
+      return;
+    }
+
+    const payload = {
+      ruc: formData.ruc,
+      razon_social: nombreRazon,
+      tipo_identificacion: formData.tipoIdentificacion
+    };
+
+    const res = await api.post('/api/createClient', payload);
+
+    if (res.status === 201) {
+      showSuccess('Cliente creado exitosamente.');
+      // Opcional: limpiar los estados después de una creación exitosa
+      setFormData(prev => ({ ...prev, ruc: '' }));
+      setNombreRazon('');
+      setHabilitarNombreRazon(false);
+    } else {
+      // Manejar otros estados de éxito si tu API lo requiere
+      showError('Error al crear el cliente.');
+    }
+
+  } catch (err) {
+    showError('Hubo un error al crear el cliente.');
+    console.error(err);
+  }
+};
 
   // --- Efectos para la navegación y focus de la pregunta ---
   useEffect(() => {
@@ -140,6 +175,12 @@ export default function CargarFacturas() {
     window.addEventListener("keydown", handleKeyDownGlobal);
     return () => window.removeEventListener("keydown", handleKeyDownGlobal);
   }, [selected, pregunta, navigate]); // Dependencias para handleKeyDownGlobal
+
+  useEffect(()=> {
+    if(nombreRazon?.trim() !== '') {
+      setAvailableCreateCButton(false)
+    }
+  }, [nombreRazon])
 
   // --- Lógica del formulario ---
 
@@ -229,7 +270,6 @@ export default function CargarFacturas() {
       const cleanFormData: FormData = {
         ...formData,
         idClient: id,
-        // Usar la fecha ya convertida a YYYY-MM-DD
         fechaEmision: fechaParaBackend, 
         montoGravado10: formData.montoGravado10.replace(/\./g, ''),
         montoGravado5: formData.montoGravado5.replace(/\./g, ''),
@@ -342,24 +382,42 @@ export default function CargarFacturas() {
   };
 
   const loadNombreRazon = async () => {
-    if (!formData.ruc || formData.ruc.trim() === '') {
-      setNombreRazon("Ingrese un RUC/CI");
-      return;
+  if (!formData.ruc || formData.ruc.trim() === '') {
+    setNombreRazon("Ingrese un RUC/CI");
+    return;
+  }
+  try {
+    const res = await api.get(`/api/getClientByRuc/${formData.ruc}`);
+    console.log(res)
+    // Esta parte se ejecuta si la respuesta es 2xx
+    if (!res.data) {
+      showWarning("Cliente no encontrado, creelo");
+      setHabilitarNombreRazon(true);
+    } else {
+      setFormData(prev => ({...prev, ruc: !formData.ruc?.includes('-') && res.data.guion  ? `${formData.ruc}-${res.data.guion}` : formData.ruc, tipoIdentificacion: res.data.guion ? 'ruc' : 'ci'}));
+      setNombreRazon(res.data.razon_social);
+      setHabilitarNombreRazon(false);
     }
-    try {
-      const res = await api.get(`/api/getClientByRuc/${formData.ruc}`);
-      if(res.status !== 200 || !res.data) {
-        showError("Cliente no encontrado.");
-        setNombreRazon("No encontrado");
+  } catch (err) {
+    // Aquí verificamos si el error es de tipo AxiosError
+    if (axios.isAxiosError(err)) {
+      if (err.response && err.response.status === 404) {
+        // Manejar el caso de un 404
+        showWarning("Cliente no encontrado, creelo");
+        setHabilitarNombreRazon(true);
       } else {
-        setFormData(prev => ({...prev, ruc: `${formData.ruc}-${res.data.guion}`}));
-        setNombreRazon(res.data.razon_social);
+        // Manejar otros errores HTTP
+        setNombreRazon("Error al cargar");
+        showError('Hubo un error al buscar el cliente');
       }
-    } catch (err) {
-      setNombreRazon("Error al cargar");
-      showError('Hubo un error al buscar el cliente');
+    } else {
+      // Manejar otros errores que no sean de Axios
+      setNombreRazon("Error desconocido");
+      showError('Hubo un error inesperado.');
+      console.error(err); // Opcional: imprimir el error completo en consola
     }
-  };
+  }
+};
 
   useEffect(() => {
     if(formData.tipoIdentificacion === 'sin nombre') {
@@ -615,18 +673,31 @@ export default function CargarFacturas() {
             <Label htmlFor="numero-identificacion" className="text-sm font-medium text-gray-700">
               Número de Identificación
             </Label>
-            <Input className="bg-yellow-50 border-yellow-200" value={formData.ruc} onChange={(e)=> setFormData(prev => ({...prev, ruc: e.target.value}))}/>
-            <span></span>
-            { formData.tipoIdentificacion !== 'sin nombre' && (
-              <Button onClick={loadNombreRazon}>Cargar</Button>
-            )}
+            <Input className="bg-yellow-50 border-yellow-200" onBlur={async ()=> {
+              if(formData.tipoIdentificacion !== 'sin nombre') {
+                await loadNombreRazon()
+              }
+            }} 
+            value={formData.ruc} onChange={(e)=> setFormData(prev => ({...prev, ruc: e.target.value}))}/>
           </div>
 
           <div className="space-y-2 md:col-span-2">
             <Label htmlFor="nombre-razon" className="text-sm font-medium text-gray-700">
               Nombre o Razón Social
             </Label>
-            <Input className="bg-gray-100 border-gray-300" value={nombreRazon} readOnly/>
+            <Input className="bg-gray-100 border-gray-300" value={nombreRazon} onChange={(e)=> {
+              setNombreRazon(e.target.value)
+            }} readOnly={!habilitarNombreRazon}/>
+            {/* El nuevo botón se agrega aquí, debajo del input */}
+          {habilitarNombreRazon && (
+            <Button 
+              onClick={createNewClient}
+              className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+              disabled={availableCreateCButton}
+            >
+              Crear nuevo cliente
+            </Button>
+          )}
           </div>
         </div>
 
