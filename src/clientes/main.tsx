@@ -8,26 +8,44 @@ import React from 'react';
 interface Cliente {
   id: string | number;
   razon_social: string;
-  base: string; // Assuming 'base' exists based on previous conversations
+  base: string; 
   vence: string;
   guion: string;
 }
+
+// Función auxiliar para determinar el vencimiento basado en el último dígito de 'base'
+const getVencimiento = (base: string): string => {
+  const lastDigit = parseInt(base.slice(-1), 10);
+  const vencimientosMap: { [key: number]: string } = {
+    0: '7',
+    1: '9',
+    2: '11',
+    3: '13',
+    4: '15',
+    5: '17',
+    6: '19',
+    7: '21',
+    8: '23',
+    9: '25',
+  };
+  return vencimientosMap[lastDigit] || ''; // Devuelve el vencimiento o una cadena vacía si no hay coincidencia
+};
 
 export default function Clientes() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
-  // Your predefined vencimientos.
-  // We'll also dynamically get vencimientos from the data to ensure all are covered.
-  const predefinedVencimientos = ['7', '9', '11', '13', '15', '17', '19', '21', '23', '25'];
-
   useEffect(() => {
     const fetchClientes = async () => {
       try {
         const response = await api.get<Cliente[]>('/api/getClients');
-        console.log('Clientes obtenidos:', response.data);
-        setClientes(response.data);
+        // Procesar los datos para asignar el vencimiento antes de guardarlos
+        const processedClientes = response.data.map(cliente => ({
+          ...cliente,
+          vence: getVencimiento(cliente.base),
+        }));
+        setClientes(processedClientes);
       } catch (error) {
         console.error('Error al obtener clientes:', error);
       } finally {
@@ -37,10 +55,6 @@ export default function Clientes() {
 
     fetchClientes();
   }, []);
-
-  useEffect(()=> {
-    console.log(clientes)
-  }, [clientes])
 
   const handleCreateFactura = (clienteId: Cliente['id']) => {
     navigate(`/facturas/${clienteId}`);
@@ -56,17 +70,13 @@ export default function Clientes() {
     );
   }
 
-  // --- Dynamic Sorting and Grouping Logic ---
-  // Get all unique 'vence' values from the fetched clients, including those not in predefinedVencimientos
-  const allUniqueVencimientos = Array.from(new Set(clientes.map(cliente => cliente.vence)));
+  // Agrupar y ordenar clientes por vencimiento
+  const groupedClientes = clientes.reduce((acc, cliente) => {
+    (acc[cliente.vence] = acc[cliente.vence] || []).push(cliente);
+    return acc;
+  }, {} as Record<string, Cliente[]>);
 
-  // Combine predefined and dynamic vencimientos, then sort them numerically
-  const sortedUniqueVencimientos = Array.from(new Set([...predefinedVencimientos, ...allUniqueVencimientos]))
-    .sort((a, b) => {
-      const venceA = parseInt(a, 10);
-      const venceB = parseInt(b, 10);
-      return venceA - venceB;
-    });
+  const sortedVencimientos = Object.keys(groupedClientes).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
 
   return (
     <div>
@@ -78,56 +88,41 @@ export default function Clientes() {
         {clientes.length === 0 ? (
           <div className="alert alert-info">No hay clientes registrados</div>
         ) : (
-          <div> {/* Wrap the dynamic content */}
-            {sortedUniqueVencimientos.map(vencimiento => {
-              // Filter clients for the current 'vence' group
-              const clientsInGroup = clientes.filter(cliente => cliente.vence === vencimiento);
-
-              // Only render the group if there are clients in it
-              if (clientsInGroup.length === 0) {
-                return null; // Don't render anything if no clients match this vencimiento
-              }
-
-              return (
-                <React.Fragment key={`vence-group-${vencimiento}`}>
-                  {/* Vencimiento header */}
-                  <h4 className="mt-4 mb-2">Vencimiento: {vencimiento}</h4>
-                  <ul className="list-group mb-4">
-                    {/* Map over the filtered clients for this group */}
-                    {clientsInGroup.map(cliente => (
-                      <li
-                        key={cliente.id}
-                        className="list-group-item d-flex justify-content-between align-items-center"
-                      >
-                        <div>
-                          {/* Primary information: Razon Social */}
-                          <h5 className="mb-1">{cliente.razon_social}</h5>
-                          {/* Secondary information: base and Vence */}
-                          <small className="text-muted">
-                            {/* Assuming 'base' is available on Cliente interface */}
-                            RUC: {cliente.base}{ cliente.guion ? '-' + cliente.guion : ""} <br />
-                          </small>
-                        </div>
-                        <div className="d-flex gap-2">
-                          <button
-                            className="btn btn-outline-info btn-sm"
-                            onClick={() => navigate(`/edit/cliente/${cliente.id}`)}
-                          >
-                            <FaEdit /> Editar
-                          </button>
-                          <button
-                            className="btn btn-outline-primary btn-sm"
-                            onClick={() => handleCreateFactura(cliente.id)}
-                          >
-                            <FaFile /> Facturas
-                          </button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </React.Fragment>
-              );
-            })}
+          <div>
+            {sortedVencimientos.map(vencimiento => (
+              <React.Fragment key={`vence-group-${vencimiento}`}>
+                <h4 className="mt-4 mb-2">Vencimiento: {vencimiento}</h4>
+                <ul className="list-group mb-4">
+                  {groupedClientes[vencimiento].map(cliente => (
+                    <li
+                      key={cliente.id}
+                      className="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <div>
+                        <h5 className="mb-1">{cliente.razon_social}</h5>
+                        <small className="text-muted">
+                          RUC: {cliente.base}{cliente.guion ? '-' + cliente.guion : ""} <br />
+                        </small>
+                      </div>
+                      <div className="d-flex gap-2">
+                        <button
+                          className="btn btn-outline-info btn-sm"
+                          onClick={() => navigate(`/edit/cliente/${cliente.id}`)}
+                        >
+                          <FaEdit /> Editar
+                        </button>
+                        <button
+                          className="btn btn-outline-primary btn-sm"
+                          onClick={() => handleCreateFactura(cliente.id)}
+                        >
+                          <FaFile /> Facturas
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </React.Fragment>
+            ))}
           </div>
         )}
       </div>
