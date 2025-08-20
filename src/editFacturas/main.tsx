@@ -356,7 +356,7 @@ export default function EditFacturas() {
               Fecha de Emisión
             </Label>
             <div className="relative">
-              <Input readOnly type="date" placeholder="Elegir Fecha" value={typeof formData.fechaEmision !== 'string' ? dayjs.utc(formData.fechaEmision).format('DD-MM-YYYY') : formData.fechaEmision} onChange={(e)=> setFormData({...formData, fechaEmision: e.target.value})} className="bg-yellow-50 border-yellow-200 pr-10" />
+              <Input type="date" placeholder="Elegir Fecha" value={typeof formData.fechaEmision !== 'string' ? dayjs.utc(formData.fechaEmision).format('DD-MM-YYYY') : formData.fechaEmision} onChange={(e)=> setFormData({...formData, fechaEmision: e.target.value})} className="bg-yellow-50 border-yellow-200 pr-10" />
             </div>
           </div>
 
@@ -375,14 +375,14 @@ export default function EditFacturas() {
             <Label htmlFor="timbrado" className="text-sm font-medium text-gray-700">
               Timbrado
             </Label>
-            <Input readOnly className="bg-yellow-50 border-yellow-200" value={formData.timbrado} onChange={(e)=> setFormData({...formData, timbrado: e.target.value})}/>
+            <Input className="bg-yellow-50 border-yellow-200" value={formData.timbrado} onChange={(e)=> setFormData({...formData, timbrado: e.target.value})}/>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="numero-comprobante" className="text-sm font-medium text-gray-700">
               Número del Comprobante
             </Label>
-            <Input readOnly value={formData.numeroFactura} onChange={(e)=> setFormData({...formData, numeroFactura: e.target.value})} className="bg-yellow-50 border-yellow-200" />
+            <Input value={formData.numeroFactura} onChange={(e)=> setFormData({...formData, numeroFactura: e.target.value})} className="bg-yellow-50 border-yellow-200" />
           </div>
         </div>
 
@@ -485,7 +485,6 @@ export default function EditFacturas() {
       <Label className="text-xs text-gray-600">Monto Gravado 10%</Label>
       <Input
         className="text-center"
-        readOnly
         value={formatNumber(formData.montoGravado10)}
         onChange={(e) => setFormData({...formData, montoGravado10: formatNumber(e.target.value)})}
         onBlur={handleBlurGravado10}
@@ -496,14 +495,12 @@ export default function EditFacturas() {
       <Input
         className="text-center"
         value={formatNumber(impuesto10)}
-        readOnly
       />
     </div>
     <div className="space-y-2">
       <Label className="text-xs text-gray-600">Monto Gravado 5%</Label>
       <Input
         className="text-center"
-        readOnly
         value={formData.montoGravado5}
         onChange={(e) => setFormData({...formData, montoGravado5: formatNumber(e.target.value)})}
         onBlur={handleBlurGravado5}
@@ -514,7 +511,6 @@ export default function EditFacturas() {
       <Input
         className="text-center"
         value={formatNumber(impuesto5)}
-        readOnly
       />
     </div>
     <div className="space-y-2">
