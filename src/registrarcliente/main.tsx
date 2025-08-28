@@ -1,176 +1,92 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import type { FormEvent } from 'react';
-import Header from '../components/Header';
+import type {FormEvent} from 'react';
+import { Mail } from 'lucide-react';
+// Importamos el hook de notificaciones desde tu contexto.
+import { useNotifications } from "../context/NotificationContext";
 import api from '../lib/api';
-
-interface Notification {
-  show: boolean;
-  message: string;
-  type: 'success' | 'danger' | string;
-}
-
-export default function RegistrarCliente() {
-  const [rucToShow, setRucToShow] = useState<string>('');
-  const [razonSocial, setRazonSocial] = useState<string>('');
-  const [pagaIVA, setPagaIVA] = useState<boolean>(false);
-  const [pagaIRE, setPagaIRE] = useState<boolean>(false);
-  const [pagaIRP, setPagaIRP] = useState<boolean>(false);
-  const [notification, setNotification] = useState<Notification>({
-    show: false,
-    message: '',
-    type: '',
-  });
-  let ruc = '';
+/**
+ * Componente principal para el formulario de solicitud.
+ * Este componente maneja el estado del formulario y el envío de datos,
+ * utilizando el contexto de notificaciones para mostrar mensajes al usuario.
+ */
+export default function App() {
+  // Estado para almacenar el RUC ingresado por el usuario.
+  const [ruc, setRuc] = useState<string>('');
+  // Desestructuramos las funciones del contexto de notificaciones.
+  const { showSuccess, showError } = useNotifications();
+  // Estado para deshabilitar el botón de envío durante el proceso.
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const navigate = useNavigate();
 
+  /**
+   * Maneja el envío del formulario.
+   * @param {FormEvent<HTMLFormElement>} e - El evento de envío del formulario.
+   */
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Simula una llamada a la API con un retraso de 1 segundo.
     try {
-      ruc = rucToShow
-      const infoResponse = await api.post('/v0/api/info', { ruc });
+      // Reemplaza 'http://your-server-url/send-request' con tu endpoint real
+      const response = await api.post('/api/send/accessRequest', {ruc});
 
-      const formattedRuc = `${rucToShow}-${infoResponse.data.guion}`;
-      setRazonSocial(infoResponse.data.razon_social);
-      setRucToShow(formattedRuc);
-
-      const createResponse = await api.post('/v0/api/cliente/create', {
-        ruc,
-        razon_social: infoResponse.data.razon_social,
-        pagaIVA,
-        pagaIRE,
-        pagaIRP,
-      });
-
-
-      if (createResponse.status === 200) {
-        showNotification('¡Cliente creado correctamente!', 'success');
-        setTimeout(() => navigate('/clientes'), 1000);
+      if (response.status == 200) {
+        // Usa la función del contexto para mostrar una notificación de éxito.
+        showSuccess('¡Solicitud enviada correctamente!');
+        setRuc(''); // Limpia el campo RUC al tener éxito.
+      } else {
+        // Usa la función del contexto para mostrar una notificación de error.
+        showError('Hubo un error al enviar la solicitud. Por favor, intente de nuevo.');
       }
-    } catch (error: unknown) {
-        if(error instanceof Error) {
-          showNotification('Hubo un error', 'danger');
-        } else {
-          showNotification('Hubo un error', 'danger');
-        }
+    } catch (error) {
+      // Captura y maneja cualquier error de red usando la función de error del contexto.
+      console.error("Error sending request:", error);
+      showError('Error de conexión. Por favor, revise su red.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const showNotification = (message: string, type: Notification['type']) => {
-    setNotification({ show: true, message, type });
-    setTimeout(() => {
-      setNotification((prev) => ({ ...prev, show: false }));
-    }, 3000);
-  };
-
   return (
-    <div style={{ backgroundColor: '#fff', minHeight: '100vh' }}>
-      <Header />
-
-      {notification.show && (
-        <div
-          className={`alert alert-${notification.type} text-center position-fixed top-0 start-50 translate-middle-x w-50`}
-          style={{ zIndex: 1050 }}
-          role="alert"
-        >
-          {notification.message}
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl shadow-2xl overflow-hidden max-w-lg w-full">
+        {/* Encabezado de la tarjeta */}
+        <div className="bg-blue-900 text-white p-6">
+          <h2 className="text-2xl font-bold text-center flex items-center justify-center space-x-2">
+            <Mail size={24} />
+            <span>Enviar Solicitud</span>
+          </h2>
         </div>
-      )}
+        
+        {/* Cuerpo del formulario */}
+        <div className="p-8">
+          <form onSubmit={handleSubmit}>
+            <div className="mb-6">
+              <label htmlFor="ruc" className="block text-gray-700 text-sm font-semibold mb-2">
+                RUC para la Solicitud
+              </label>
+              <input
+                type="text"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+                id="ruc"
+                value={ruc}
+                onChange={(e) => setRuc(e.target.value)}
+                placeholder="Ej. 123456789"
+                required
+              />
+            </div>
 
-      <div
-        className="container d-flex align-items-center justify-content-center"
-        style={{ minHeight: 'calc(100vh - 60px)' }}
-      >
-        <div className="card" style={{ maxWidth: '600px', width: '100%' }}>
-          <div
-            className="card-header"
-            style={{ backgroundColor: '#112A46', color: 'white' }}
-          >
-            <h2 className="mb-0 text-center">Registro de Cliente</h2>
-          </div>
-          <div className="card-body">
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label htmlFor="ruc" className="form-label">
-                  RUC
-                </label>
-                <input
-                  type="text"
-                  className="form-control form-control-lg"
-                  id="ruc"
-                  value={rucToShow}
-                  onChange={(e) => setRucToShow(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="razonSocial" className="form-label">
-                  Razón Social
-                </label>
-                <input
-                  type="text"
-                  className="form-control form-control-lg"
-                  id="razonSocial"
-                  value={razonSocial}
-                  readOnly
-                />
-              </div>
-
-              <div className="form-check mb-2">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="pagaIVA"
-                  onChange={() => setPagaIVA(!pagaIVA)}
-                  checked={pagaIVA}
-                  readOnly
-                />
-                <label className="form-check-label" htmlFor="pagaIVA">
-                  Paga IVA
-                </label>
-              </div>
-              <div className="form-check mb-2">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="pagaIRE"
-                  onChange={() => setPagaIRE(!pagaIRE)}
-                  checked={pagaIRE}
-                  readOnly
-                />
-                <label className="form-check-label" htmlFor="pagaIRE">
-                  Paga IRE
-                </label>
-              </div>
-              <div className="form-check mb-3">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="pagaIRP"
-                  onChange={() => setPagaIRP(!pagaIRP)}
-                  checked={pagaIRP}
-                  readOnly
-                />
-                <label className="form-check-label" htmlFor="pagaIRP">
-                  Paga IRP
-                </label>
-              </div>
-
-              <button
-                type="submit"
-                className="btn btn-primary btn-lg w-100"
-                style={{ backgroundColor: '#112A46', borderColor: '#112A46' }}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Procesando...' : 'Registrar Cliente'}
-              </button>
-            </form>
-          </div>
+            {/* Botón de envío */}
+            <button
+              type="submit"
+              className={`w-full py-3 px-4 text-white font-bold rounded-lg transition-colors duration-200 ${
+                isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-900 hover:bg-blue-800'
+              }`}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Enviando...' : 'Enviar Solicitud'}
+            </button>
+          </form>
         </div>
       </div>
     </div>

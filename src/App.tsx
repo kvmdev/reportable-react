@@ -14,6 +14,8 @@ import EditFacturas from "./editFacturas/main"
 import RegistrarContador from "./registrarContador/main"
 import Profile from "./profile/main"
 import { FacturaProvider } from "./context/FacturaContext"
+import RegisterClient from "./register/cliente/main"
+import RegisterAccountant from "./register/contador/main"
 import CargarFacturasCliente from "./cargarfacturascliente/main"
 
 function App() {
@@ -25,6 +27,8 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<Dashboard />} />
+            <Route path="/register/client" element={<RegisterClient />} />
+            <Route path="/register/accountant" element={<RegisterAccountant />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/registrar-cliente" element={<RegistrarCliente />} />
             <Route path="/registrar-contador" element={<RegistrarContador />} />
