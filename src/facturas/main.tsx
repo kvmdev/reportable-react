@@ -27,6 +27,7 @@ const Facturas: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const { showError } = useNotifications();
     const [isDownloading, setIsDownloading] = useState<boolean>(false);
+    const [isDownloadingRG90, setIsDownloadingRG90] = useState<boolean>(false);
     const [isLoadingFacturas, setIsLoadingFacturas] = useState(false);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [page, setPage] = useState(1);
@@ -142,6 +143,49 @@ const Facturas: React.FC = () => {
         }
     };
 
+    const handleDownloadRG90 = async () => {
+        if (!id || !month || !year || rol === 'SELECCIONE') {
+            showError("Por favor, seleccione Mes, Año y Rol para descargar el reporte.");
+            return;
+        }
+
+        try {
+            setIsDownloadingRG90(true);
+            const res = await api.post('/api/report/excel-rg90', { idClient: id, month, year, rol });
+
+            const checkStatusInterval = setInterval(async () => {
+                try {
+                    const response = await api.get('/api/verify/' + res.data.id);
+                    if (response.data.link) {
+                        clearInterval(checkStatusInterval);
+                        setIsDownloadingRG90(false);
+                        const a = document.createElement('a');
+                        a.href = response.data.link;
+                        a.download = `reporte-rg90-${res.data.id}.xlsx`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    }
+                } catch (error: unknown) {
+                    clearInterval(checkStatusInterval);
+                    setIsDownloadingRG90(false);
+                    if (error instanceof Error) {
+                        showError(`Error al verificar el estado: ${error.message}`);
+                    } else {
+                        showError("Error desconocido al verificar el estado del reporte.");
+                    }
+                }
+            }, 3000);
+        } catch (error: unknown) {
+            setIsDownloadingRG90(false);
+            if (error instanceof Error) {
+                showError(error.message);
+            } else {
+                showError("Error desconocido al descargar");
+            }
+        }
+    };
+
     const matchFactura = (factura: FacturaContent) => {
         const term = searchTerm.toLowerCase();
         const rolStr = factura.userIdVendedor === Number(id) ? "VENTA" : "COMPRA";
@@ -229,15 +273,26 @@ const Facturas: React.FC = () => {
                         {isLoadingFacturas ? "Cargando..." : "Mostrar Facturas"}
                     </Button>
                     {hasResults && (
-                        <Button onClick={handleDownload} disabled={isDownloading}>
-                            {isDownloading ? (
-                                <div className="spinner-border spinner-border-sm" role="status">
-                                    <span className="visually-hidden">Loading...</span>
-                                </div>
-                            ) : (
-                                "Descargar"
-                            )}
-                        </Button>
+                        <>
+                            <Button onClick={handleDownload} disabled={isDownloading}>
+                                {isDownloading ? (
+                                    <div className="spinner-border spinner-border-sm" role="status">
+                                        <span className="visually-hidden">Loading...</span>
+                                    </div>
+                                ) : (
+                                    "Descargar (planilla)"
+                                )}
+                            </Button>
+                            <Button onClick={handleDownloadRG90} disabled={isDownloadingRG90}>
+                                {isDownloadingRG90 ? (
+                                    <div className="spinner-border spinner-border-sm" role="status">
+                                        <span className="visually-hidden">Loading...</span>
+                                    </div>
+                                ) : (
+                                    "Descargar (RG90)"
+                                )}
+                            </Button>
+                        </>
                     )}
                 </div>
 
