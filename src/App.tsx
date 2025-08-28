@@ -14,6 +14,7 @@ import EditFacturas from "./editFacturas/main"
 import RegistrarContador from "./registrarContador/main"
 import Profile from "./profile/main"
 import { FacturaProvider } from "./context/FacturaContext"
+import CargarFacturasCliente from "./cargarfacturascliente/main"
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             <Route path="/factura/:id/:idClient" element={<FacturaProvider><EditFacturas /></FacturaProvider>} />
             <Route path='/edit/cliente/:id' element={<ClienteEditor />} />
             <Route path="/cargarfactura/:id" element={<CargarFacturas />} />
+            <Route path="/cargar-facturas" element={<CargarFacturasCliente />} />
             <Route path="*" element={<h1>404 Not Found</h1>} />
           </Routes>
         </AuthProvider>

@@ -6,12 +6,12 @@ import Header from "../components/Header";
 export default function Dashboard() {
   const { user, loading } = useContext(AuthContext);
 
-  useEffect(()=> {
-    console.log(user)
-  }, [user])
+  useEffect(() => {
+    console.log(user);
+  }, [user]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Cargando...</div>;
   }
 
   return (
@@ -47,7 +47,9 @@ export default function Dashboard() {
           <div className="d-flex min-vh-100 justify-content-center align-items-center">
             <div className="p-4 bg-white rounded-3 shadow">
               <h1 className="text-center mb-4">Menú Principal</h1>
-              
+              <a href="/cargar-facturas" className="btn btn-success w-100">
+                <i className="bi bi-plus"></i> Cargar Facturas
+              </a>
             </div>
           </div>
         )}
