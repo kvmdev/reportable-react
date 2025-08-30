@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Crear instancia de axios
 const api = axios.create({
-  baseURL: /* 'http://localhost:3000' */"https://seashell-app-384ew.ondigitalocean.app", 
+  baseURL: 'http://localhost:3000'/* "https://seashell-app-384ew.ondigitalocean.app" */, 
 });
 
 // Interceptar cada petición para agregar el token
