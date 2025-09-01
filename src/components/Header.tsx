@@ -24,7 +24,13 @@ export default function Header() {
         requestId: id,
         action: 'accept'
       })
-      setNotifications(notifications.filter(notification => notification.id !== id));
+      if(response.status === 200) {
+        setNotifications(
+          notifications.filter((notification) => notification.id !== id)
+        );
+      } else {
+        showError('Hubo un error');
+      }
     } catch (error) {
       showError('Hubo un error');
     }
@@ -37,7 +43,13 @@ export default function Header() {
         requestId: id,
         action: 'reject'
       })
-      setNotifications(notifications.filter(notification => notification.id !== id));
+      if(response.status === 200) {
+        setNotifications(
+          notifications.filter((notification) => notification.id !== id)
+        );
+      } else {
+        showError('Hubo un error');
+      }
     } catch (error) {
       showError('Hubo un error');
     }
@@ -45,13 +57,14 @@ export default function Header() {
 
   const fetchRequests = async ()=> {
     try {
-      const response = api.get('/api/get/accessRequests')
-      .then(res => {
-        console.log(res.data)
-        setNotifications(res.data)
-      }).catch(err => showError('Hubo un error al obtener las notificaciones'))
-    } catch (error) {
-      showError('Hubo un error al obtener las notificaciones')
+      const response = await api.get('/api/get/accessRequests')
+      if(response.status === 200) {
+        setNotifications(response.data);
+      } else {
+        showError('Hubo un error');
+      }
+    } catch(err) {
+      showError("Hubo un error");
     }
   }
 
