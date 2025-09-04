@@ -12,7 +12,7 @@ const CargarFacturasCliente: React.FC = () => {
   // --- 1. Abrir la cámara ---
   const handleAbrirCamara = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         setImagenCapturada(null);
